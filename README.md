@@ -19,8 +19,8 @@ This system utilizes a "Hybrid-Host" architecture to bypass Docker network isola
 ```mermaid
 graph TD
     %% EXTERNAL ACTORS
-    User["💀 User / Attacker"] -->|HTTP/TCP Traffic| Firewall["🔥 Azure NSG Firewall"]
-    Firewall -->|Filtered Traffic| VM["☁️ Azure Linux VM (Host)"]
+    User["💀 User / Attacker"] -->|"HTTP Traffic (Port 80) & AI (Port 9090)"| Firewall["🔥 Azure NSG Firewall"]
+    Firewall -->|"Filtered Traffic"| VM["☁️ Azure Linux VM (Host)"]
 
     %% THE HOST MACHINE
     subgraph "The Unkillable Node (Project Titan)"
@@ -50,11 +50,11 @@ graph TD
         end
     end
 
-    %% 1. TRAFFIC FLOW (The 'Happy' Path)
+    %% 1. TRAFFIC FLOW (The Happy Path)
     VM --> Nginx
-    Nginx -->|Reverse Proxy (Port 5000)| App
-    App -->|Read/Write Telemetry| SQL
-    App -->|Raw TCP Socket (Host Network)| Llama
+    Nginx -->|"Reverse Proxy (Internal Loopback)"| App
+    App -->|"Read/Write Telemetry"| SQL
+    App -->|"Raw TCP Socket (Host Network)"| Llama
 
     %% 2. HOSTING LOGIC
     Docker --"Runs & Manages"--> Llama
