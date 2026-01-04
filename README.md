@@ -50,4 +50,5 @@ graph TD
     TitanDaemon --"Kicks Attacker"--> User
     
     App --"Raw TCP Socket"--> Llama
+    Docker --"Hosts Environment"--> Llama
     Llama --"Threat Analysis"--> TitanDaemon
