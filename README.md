@@ -2,7 +2,7 @@
 
 > **"I didn't just build a server. I engineered an autonomous digital fortress."**
 
-### 🔗 Live System: [http://172.172.170.87](http://172.172.170.87)
+### 🔗 Live System: [https://titanalfapro.org](https://titanalfapro.org)
 
 ---
 
