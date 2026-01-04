@@ -14,41 +14,61 @@ The goal was to demonstrate **Senior-Level DevOps & Engineering** capabilities b
 ---
 
 ## 🏗️ Architecture Diagram
-This system utilizes a "Hybrid-Host" architecture to bypass Docker network isolation, allowing the C# Backend to communicate with the Llama 3.2 AI over raw TCP sockets.
+This system utilizes a "Hybrid-Host" architecture to bypass Docker network isolation, allowing the C# Backend to communicate with the Llama 3.2 AI over raw TCP sockets. The diagram below illustrates the full logic flow, including the Kernel Supervision (Ring 0) and the Active Defense Loop.
 
 ```mermaid
 graph TD
-    User["🌍 User / Attacker"] -->|HTTP Request| Firewall["🔥 Azure NSG Firewall"]
-    Firewall -->|Allowed Traffic| VM["☁️ Azure Linux VM"]
-    
+    %% EXTERNAL ACTORS
+    User["💀 User / Attacker"] -->|HTTP/TCP Traffic| Firewall["🔥 Azure NSG Firewall"]
+    Firewall -->|Filtered Traffic| VM["☁️ Azure Linux VM (Host)"]
+
+    %% THE HOST MACHINE
     subgraph "The Unkillable Node (Project Titan)"
         direction TB
-        
-        subgraph "Kernel Layer (Ring 0)"
+
+        %% RING 0 - KERNEL & SECURITY
+        subgraph "Kernel Space (Ring 0)"
             SystemD["⚙️ Systemd Supervisor"]
-            TitanDaemon["🐍 Titan Security Daemon (Python)"]
+            Netstat["🔎 Kernel Network Stack"]
+            Iptables["🛡️ IP Tables (Firewall Rules)"]
+            TitanDaemon["🐍 Titan Security Daemon"]
         end
-        
+
+        %% USER SPACE - INFRASTRUCTURE
         subgraph "Application Layer"
-            Nginx["🌐 Nginx Web Server"]
+            Nginx["🌐 Nginx Reverse Proxy"]
             App["💻 C# .NET Backend"]
             SQL[("🗄️ SQL Database")]
         end
-        
-        subgraph "AI Inference Layer"
-            Docker["🐳 Docker Container"]
-            Llama["🤖 Llama 3.2 Vision AI"]
+
+        %% CONTAINER SPACE
+        subgraph "Docker Isolation"
+            Docker["🐳 Docker Engine"]
+            subgraph "Container"
+                Llama["🤖 Llama 3.2 Vision AI"]
+            end
         end
     end
 
-    %% Logic Flows
-    SystemD --"Auto-Restarts (500ms)"--> Nginx
-    SystemD --"Auto-Restarts"--> TitanDaemon
-    
-    TitanDaemon --"Monitors PIDs"--> App
-    TitanDaemon --"Scans Network (Netstat)"--> Firewall
-    TitanDaemon --"Kicks Attacker"--> User
-    
-    App --"Raw TCP Socket"--> Llama
-    Docker --"Hosts Environment"--> Llama
-    Llama --"Threat Analysis"--> TitanDaemon
+    %% 1. TRAFFIC FLOW (The 'Happy' Path)
+    VM --> Nginx
+    Nginx -->|Reverse Proxy (Port 5000)| App
+    App -->|Read/Write Telemetry| SQL
+    App -->|Raw TCP Socket (Host Network)| Llama
+
+    %% 2. HOSTING LOGIC
+    Docker --"Runs & Manages"--> Llama
+
+    %% 3. SELF-HEALING LOOPS (SystemD Supervision)
+    SystemD --"Watchdog (PID Monitor)"--> Nginx
+    SystemD --"Watchdog (PID Monitor)"--> App
+    SystemD --"Watchdog (PID Monitor)"--> SQL
+    SystemD --"Watchdog (PID Monitor)"--> TitanDaemon
+
+    %% 4. ACTIVE DEFENSE LOOPS (The Titan Logic)
+    TitanDaemon --"1. Scans Active Connections"--> Netstat
+    Netstat --"Returns Threat Data"--> TitanDaemon
+    TitanDaemon --"2. Threat Analysis"--> Llama
+    Llama --"3. Kill Decision"--> TitanDaemon
+    TitanDaemon --"4. Updates Rules"--> Iptables
+    Iptables --"5. BLOCKS IP"--> User
