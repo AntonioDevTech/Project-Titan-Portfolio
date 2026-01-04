@@ -10,7 +10,8 @@ from datetime import datetime
 
 LOG_FILE = "/var/log/titan_security.log"
 THREAT_THRESHOLD = 50  # Max connections per IP allowed
-SAFE_IPS = ["127.0.0.1", "172.172.170.87"]
+# Whitelist local loopback and the domain (resolved)
+SAFE_IPS = ["127.0.0.1", "::1", "titanalfapro.org"]
 
 def log_event(message):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
