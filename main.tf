@@ -13,6 +13,7 @@ terraform {
 
 provider "azurerm" {
   features {}
+  # Your specific Subscription ID
   subscription_id = "3b5728ab-52cc-44c8-b49d-9a179c4dd97d"
 }
 
@@ -38,7 +39,7 @@ resource "azurerm_subnet" "titan_subnet" {
   address_prefixes     = ["10.0.1.0/24"]
 }
 
-# 4. Create the Public IP (Standard/Static to fix the error)
+# 4. Create the Public IP (Static IP for Domain Stability)
 resource "azurerm_public_ip" "titan_ip" {
   name                = "titan-public-ip"
   location            = azurerm_resource_group.titan_backup.location
@@ -61,25 +62,29 @@ resource "azurerm_network_interface" "titan_nic" {
   }
 }
 
-# 6. Generate SSH Key
+# 6. Generate SSH Key (Automated Security)
 resource "tls_private_key" "titan_ssh" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
-# 7. Save Key to PC
+# 7. Save Key to Local Machine (Ignored by Git)
 resource "local_file" "private_key" {
   content         = tls_private_key.titan_ssh.private_key_pem
   filename        = "titan_key.pem"
   file_permission = "0600"
 }
 
-# 8. Create the Server
+# 8. Create the Server (The Unkillable Node)
 resource "azurerm_linux_virtual_machine" "titan_vm" {
   name                = "Titan-Cloud-Node"
   resource_group_name = azurerm_resource_group.titan_backup.name
   location            = azurerm_resource_group.titan_backup.location
-  size                = "Standard_B1s"
+  
+  # UPDATED: Matches Resume "Vertical Scaling" Story (16GB RAM for AI)
+  # Note: Change back to "Standard_B1s" if you want to save money while testing.
+  size                = "Standard_B4ms"
+  
   admin_username      = "adminuser"
   network_interface_ids = [
     azurerm_network_interface.titan_nic.id,
@@ -102,16 +107,17 @@ resource "azurerm_linux_virtual_machine" "titan_vm" {
     version   = "latest"
   }
 
+  # Bootstrapping the "Skeleton" Page
   custom_data = base64encode(<<-EOF
               #!/bin/bash
               apt-get update
               apt-get install -y nginx
-              echo '<html><body style="background-color:black; color:#00ff00; font-family:monospace; font-size:40px; text-align:center; padding-top:20%;"><h1>PROJECT TITAN: CLOUD NODE</h1><p>STATUS: UNKILLABLE</p><p>LOCATION: VIRGINIA (Azure)</p></body></html>' > /var/www/html/index.html
+              echo '<html><body style="background-color:black; color:#00ff00; font-family:monospace; font-size:40px; text-align:center; padding-top:20%;"><h1>PROJECT TITAN: CLOUD NODE</h1><p>STATUS: UNKILLABLE</p><p>LOCATION: EAST US (Azure)</p></body></html>' > /var/www/html/index.html
               EOF
   )
 }
 
-# 9. Output the IP
+# 9. Output the IP (For DNS Configuration)
 output "server_ip" {
   value = azurerm_linux_virtual_machine.titan_vm.public_ip_address
 }
