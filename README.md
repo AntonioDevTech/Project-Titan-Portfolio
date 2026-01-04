@@ -9,7 +9,7 @@
 ## 📖 Executive Summary
 **Project Titan** is a combat-tested cloud infrastructure built on **Microsoft Azure**. Unlike standard static portfolios, Titan is an **active, self-healing system** protected by a custom AI security daemon.
 
-The goal was to demonstrate **Senior-Level DevOps & Engineering** capabilities by decoupling software from hardware. This system operates autonomously, defends itself against network attacks, and heals itself if critical services fail.
+The goal was to architect a system that prioritizes **resilience and autonomy**, decoupling software from hardware to eliminate single points of failure. This system operates autonomously, defends itself against network attacks, and heals itself if critical services fail.
 
 ---
 
