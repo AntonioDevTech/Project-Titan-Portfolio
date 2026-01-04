@@ -2,7 +2,7 @@
 
 > **"I didn't just build a server. I engineered an autonomous digital fortress."**
 
-### 🔗 Live System: [titanalfapro.org)
+### 🔗 Live System: [http://172.172.170.87](http://172.172.170.87)
 
 ---
 
@@ -18,26 +18,26 @@ This system utilizes a "Hybrid-Host" architecture to bypass Docker network isola
 
 ```mermaid
 graph TD
-    User[🌍 User / Attacker] -->|HTTP Request| Firewall[🔥 Azure NSG Firewall]
-    Firewall -->|Allowed Traffic| VM[☁️ Azure Linux VM]
+    User["🌍 User / Attacker"] -->|HTTP Request| Firewall["🔥 Azure NSG Firewall"]
+    Firewall -->|Allowed Traffic| VM["☁️ Azure Linux VM"]
     
     subgraph "The Unkillable Node (Project Titan)"
         direction TB
         
         subgraph "Kernel Layer (Ring 0)"
-            SystemD[⚙️ Systemd Supervisor]
-            TitanDaemon[🐍 Titan Security Daemon (Python)]
+            SystemD["⚙️ Systemd Supervisor"]
+            TitanDaemon["🐍 Titan Security Daemon (Python)"]
         end
         
         subgraph "Application Layer"
-            Nginx[🌐 Nginx Web Server]
-            App[💻 C# .NET Backend]
-            SQL[(🗄️ SQL Database)]
+            Nginx["🌐 Nginx Web Server"]
+            App["💻 C# .NET Backend"]
+            SQL[("🗄️ SQL Database")]
         end
         
         subgraph "AI Inference Layer"
-            Docker[🐳 Docker Container]
-            Llama[🤖 Llama 3.2 Vision AI]
+            Docker["🐳 Docker Container"]
+            Llama["🤖 Llama 3.2 Vision AI"]
         end
     end
 
