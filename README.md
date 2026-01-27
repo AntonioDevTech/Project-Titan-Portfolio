@@ -21,7 +21,7 @@ The goal was to architect a system that prioritizes **resilience and autonomy**,
 ---
 
 ## 🏗️ Architecture Diagram
-This system utilizes a "Hybrid-Host" architecture to bypass Docker network isolation, allowing the C# Backend to communicate with the Security Daemon over raw TCP sockets. The diagram below illustrates the full logic flow, utilizing color-coded zones to distinguish between Kernel Space, User Space, and Active Defense layers.
+This system utilizes a "Hybrid-Host" architecture. The **Titan Security Daemon** acts as the bridge, pulling raw network data from the Kernel and sending it to the **Llama 3.2 AI** container for analysis before enforcing firewall rules.
 
 ```mermaid
 graph TD
@@ -54,26 +54,32 @@ graph TD
             App["💻 C# .NET Backend"]:::app
             SQL[("🗄️ SQL Database")]:::storage
         end
+        
+        %% AI LAYER
+        subgraph "Docker Container"
+            Llama["🤖 Llama 3.2 (Threat Analysis)"]:::ai
+        end
     end
 
     %% --- TRAFFIC & LOGIC FLOWS ---
     %% 1. Happy Path
     VM --> Nginx
-    Nginx -->|"Reverse Proxy (Internal Loopback)"| App
-    App -->|"Read/Write Telemetry"| SQL
+    Nginx -->|"Reverse Proxy"| App
+    App -->|"Read/Write"| SQL
 
     %% 2. Self-Healing Loops
-    SystemD --"Watchdog (PID Monitor)"--> Nginx
-    SystemD --"Watchdog (PID Monitor)"--> App
-    SystemD --"Watchdog (PID Monitor)"--> SQL
-    SystemD --"Watchdog (PID Monitor)"--> TitanDaemon
+    SystemD --"Watchdog"--> Nginx
+    SystemD --"Watchdog"--> App
+    SystemD --"Watchdog"--> SQL
+    SystemD --"Watchdog"--> TitanDaemon
 
-    %% 3. Active Defense Loops
-    TitanDaemon --"1. Scans Active Connections"--> Netstat
-    Netstat --"Returns Threat Data"--> TitanDaemon
-    TitanDaemon --"2. Threat Analysis"--> TitanDaemon
-    TitanDaemon --"3. Updates Rules"--> Iptables
-    Iptables --"4. BLOCKS IP"--> User
+    %% 3. Active Defense Loops (FIXED FLOW)
+    TitanDaemon --"1. Scans Connections"--> Netstat
+    Netstat --"Returns Packet Data"--> TitanDaemon
+    TitanDaemon --"2. Sends Traffic Logs"--> Llama
+    Llama --"3. Verdict: KILL"--> TitanDaemon
+    TitanDaemon --"4. Updates Rules"--> Iptables
+    Iptables --"5. BLOCKS IP"--> User
 
     %% --- APPLY STYLES ---
     class User,Firewall,VM external;
