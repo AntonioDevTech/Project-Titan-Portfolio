@@ -14,7 +14,7 @@ The goal was to architect a system that prioritizes **resilience and autonomy**,
 ---
 
 ## 🏗️ Architecture & Logic Flow
-The core of Titan is the **Security Daemon**, which acts as the central brain. It pulls raw network data, consults the AI for a threat verdict, and then enforces firewall rules at the kernel level.
+The core of Titan is the **Security Daemon**, which acts as the central brain. It pulls raw network data, consults the AI for a threat verdict, and then enforces firewall rules at the kernel level. Meanwhile, **Systemd** acts as the "immortality engine," instantly restarting any service that fails.
 
 ```mermaid
 graph TD
@@ -60,7 +60,12 @@ graph TD
     Nginx -->|"Reverse Proxy"| App
     App -->|"Read/Write"| SQL
 
-    %% 2. Active Defense Loop (THE LOGIC FLOW)
+    %% 2. Self-Healing Loops (THE FIX)
+    SystemD --"Auto-Respawns"--> Nginx
+    SystemD --"Auto-Respawns"--> App
+    SystemD --"Auto-Respawns"--> TitanDaemon
+
+    %% 3. Active Defense Loop
     TitanDaemon --"1. Scans Active Connections"--> Netstat
     Netstat --"2. Returns Threat Data"--> TitanDaemon
     TitanDaemon --"3. Sends Data for Analysis"--> Llama
