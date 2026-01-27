@@ -6,13 +6,6 @@
 
 ---
 
-## 👨‍💻 About Me
-**Antonio Alfano** | **Site Reliability Engineer & Cloud Architect**
-
-I bridge the gap between physical microchip diagnostics (Layer 1) and enterprise cloud architecture. **Dual US 🇺🇸 / Canadian 🇨🇦 Citizen** and **Former CFL Professional Athlete** (Edmonton Elks) turned Systems Engineer. I bring elite discipline to building "Unkillable" self-healing infrastructure.
-
----
-
 ## 📖 Executive Summary
 **Project Titan** is a combat-tested cloud infrastructure built on **Microsoft Azure**. Unlike standard static portfolios, Titan is an **active, self-healing system** protected by a custom AI security daemon.
 
@@ -20,8 +13,8 @@ The goal was to architect a system that prioritizes **resilience and autonomy**,
 
 ---
 
-## 🏗️ Architecture Diagram
-This system utilizes a "Hybrid-Host" architecture. The **Titan Security Daemon** acts as the bridge, pulling raw network data from the Kernel and sending it to the **Llama 3.2 AI** container for analysis before enforcing firewall rules.
+## 🏗️ Architecture & Logic Flow
+The core of Titan is the **Security Daemon**, which acts as the central brain. It pulls raw network data, consults the AI for a threat verdict, and then enforces firewall rules at the kernel level.
 
 ```mermaid
 graph TD
@@ -67,19 +60,13 @@ graph TD
     Nginx -->|"Reverse Proxy"| App
     App -->|"Read/Write"| SQL
 
-    %% 2. Self-Healing Loops
-    SystemD --"Watchdog"--> Nginx
-    SystemD --"Watchdog"--> App
-    SystemD --"Watchdog"--> SQL
-    SystemD --"Watchdog"--> TitanDaemon
-
-    %% 3. Active Defense Loops (FIXED FLOW)
-    TitanDaemon --"1. Scans Connections"--> Netstat
-    Netstat --"Returns Packet Data"--> TitanDaemon
-    TitanDaemon --"2. Sends Traffic Logs"--> Llama
-    Llama --"3. Verdict: KILL"--> TitanDaemon
-    TitanDaemon --"4. Updates Rules"--> Iptables
-    Iptables --"5. BLOCKS IP"--> User
+    %% 2. Active Defense Loop (THE LOGIC FLOW)
+    TitanDaemon --"1. Scans Active Connections"--> Netstat
+    Netstat --"2. Returns Threat Data"--> TitanDaemon
+    TitanDaemon --"3. Sends Data for Analysis"--> Llama
+    Llama --"4. Verdict: MALICIOUS"--> TitanDaemon
+    TitanDaemon --"5. Updates Firewall Rules"--> Iptables
+    Iptables --"6. DROP CONNECTION"--> User
 
     %% --- APPLY STYLES ---
     class User,Firewall,VM external;
